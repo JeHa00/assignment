@@ -11,7 +11,12 @@ class Base(models.Model):
         HAETAE = "Haetae", "해태"
         SUPI = "Supi", "수피"
 
-    team = models.CharField(max_length=10, choices=TeamChoices.choices)
+    team = models.CharField(
+        max_length=10,
+        choices=TeamChoices.choices,
+        null=False,
+        blank=False,
+    )
     created_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
 
