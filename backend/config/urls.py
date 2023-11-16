@@ -14,9 +14,38 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from django.conf.urls.static import static
+from django.urls import path, include
 from django.contrib import admin
-from django.urls import path
+from django.conf import settings
+
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from config.settings.base import API_V1_PREFIX
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api-auth/", include("rest_framework.urls")),
+    # drf-spectacular
+    path(f"{API_V1_PREFIX}/schema/", SpectacularAPIView.as_view(), name="api-schema"),
+    path(
+        f"{API_V1_PREFIX}/docs/",
+        SpectacularSwaggerView.as_view(url_name="api-schema"),
+        name="api-swagger-ui",
+    ),
+    # dj-rest-auth
+    path("dj-rest-auth/", include("dj_rest_auth.urls")),
+    # locals
+    path(f"{API_V1_PREFIX}/accounts/", include("accounts.urls")),
+    path(f"{API_V1_PREFIX}/tasks/", include("tasks.urls")),
+    path(f"{API_V1_PREFIX}/subtasks/", include("subtasks.urls")),
 ]
+
+
+if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
