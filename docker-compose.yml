@@ -28,7 +28,7 @@ services:
       retries: 10
 
   app:
-    container_name: account_book
+    container_name: assignment
     build: 
       context: .
       dockerfile: Dockerfile
