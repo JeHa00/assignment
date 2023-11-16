@@ -1,0 +1,47 @@
+version: "3"
+services:
+  db.mysql:
+    container_name: db.mysql
+    image: mysql:8.0.32
+    command: --authentication_policy=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DEV_DB_PASSWORD}
+      MYSQL_USER: ${DEV_DB_USER}
+      MYSQL_PASSWORD: ${DEV_DB_PASSWORD}
+      MYSQL_DATABASE: ${DEV_DB_NAME}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql_db:/var/lib/mysql
+    ports:
+      - ${DEV_DB_PORT}:3306
+    expose:
+      - ${DEV_DB_PORT}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exit | mysql -h localhost -P 3306 -u$$MYSQL_USER -p$$MYSQL_ROOT_PASSWORD"
+        ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+
+  app:
+    container_name: account_book
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev 
+    ports:
+      - 8000:8000
+    depends_on:
+      db.mysql:
+        condition: service_healthy
+    command: 
+      sh -c "python manage.py makemigrations && 
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000 --settings=config.settings.develop"
+
+volumes:
+  mysql_db:
