@@ -4,7 +4,6 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from rest_framework import status, exceptions
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
@@ -13,12 +12,22 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from common.http_exceptions import CommonHttpException
 from tasks.serializers import TaskSerializer
 from tasks.models import Task
+from tasks.enums import MarkAsCompletion
 
 
 class TaskView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.create_user.id != request.user.id:
+            raise exceptions.PermissionDenied
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MarkAsCompletionView(APIView):
@@ -34,9 +43,12 @@ class MarkAsCompletionView(APIView):
         if selected_task.create_user.id != request.user.id:
             raise exceptions.PermissionDenied
 
-        selected_task.completed_at = datetime.now()
+        initial_data = {
+            MarkAsCompletion.is_completed: True,
+            MarkAsCompletion.completed_at: datetime.now(),
+        }
 
-        serializer = self.serializer_class(selected_task, request.data, partial=True)
+        serializer = self.serializer_class(selected_task, initial_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
