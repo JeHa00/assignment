@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework import status
 
 from common.http_exceptions import CommonHttpException, WRONG_PASSWORD
@@ -21,7 +22,7 @@ class SignupView(CreateAPIView):
     )
     def post(
         self,
-        request,
+        request: Request,
     ) -> Response:
         """username, password, team 소속 정보를 입력하여 회원가입을 한다.
         Args:
@@ -53,7 +54,10 @@ class LoginView(APIView):
         responses=UserSerializer,
         summary="로그인 - username, password 정보 필요",
     )
-    def post(self, request):
+    def post(
+        self,
+        request: Request,
+    ) -> Response:
         username = request.data["username"]
         password = request.data["password"]
 
@@ -65,13 +69,13 @@ class LoginView(APIView):
         if not check_password(password, user.password):
             raise WRONG_PASSWORD
 
-        token = TokenObtainPairSerializer.get_token(user)  # refresh 토큰 생성
-        refresh_token = str(token)  # refresh 토큰 문자열화
-        access_token = str(token.access_token)  # access 토큰 문자열화
+        token = TokenObtainPairSerializer.get_token(user)
+        refresh_token = str(token)
+        access_token = str(token.access_token)
 
         user_data = {
             "user_id": user.id,
-            **UserSerializer(user).data,
+            "username": UserSerializer(user).data.get("username"),
         }
 
         response = Response(
@@ -88,4 +92,20 @@ class LoginView(APIView):
 
         response.set_cookie("access_token", access_token, httponly=True)
         response.set_cookie("refresh_token", refresh_token, httponly=True)
+        return response
+
+
+class LogoutView(APIView):
+    @extend_schema(
+        request=UserSerializer,
+        responses=UserSerializer,
+        summary="로그아웃: 토큰 정보 삭제",
+    )
+    def delete(self, request: Request) -> Response:
+        response = Response(
+            {"message": "logout success"},
+            status=status.HTTP_202_ACCEPTED,
+        )
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
         return response

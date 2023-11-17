@@ -72,8 +72,6 @@ def test_login_if_success(client: APIClient(), fake_user: dict):
     assert "username" in user_data
     assert user_data["username"] == user.username
 
-    assert "password" in user_data
-
     assert "message" in response.data
     assert response.data["message"] == "LOGIN_SUCCESS"
 
@@ -85,7 +83,6 @@ def test_login_if_success(client: APIClient(), fake_user: dict):
 @pytest.mark.login
 def test_login_if_not_registered_user(
     client: APIClient(),
-    fake_user: dict,
 ):
     login_data = {"username": "abcddefdef", "password": "abcdefd"}
 
@@ -115,3 +112,28 @@ def test_login_if_wrong_password(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data["detail"] == "입력한 비밀번호가 기존 비밀번호와 일치하지 않습니다."
     assert response.data["detail"].code == "WRONG_PASSWORD"
+
+
+@pytest.mark.django_db
+@pytest.mark.logout
+def test_logout_if_success(
+    client: APIClient(),
+    fake_user: dict,
+):
+    # 로그인하여 token 정보 얻기
+    login_data = fake_user["login_data"]
+
+    login_url = reverse("login")
+
+    response = client.post(login_url, login_data)
+
+    access_token = response.data["token_information"]["access_token"]
+
+    # 로그아웃 후, 토큰 정보 삭제 확인
+    logout_url = reverse("logout")
+
+    header = {"Authorization": f"Bearer {access_token}"}
+
+    response = client.delete(logout_url, headers=header)
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
