@@ -55,9 +55,9 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         selected_task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def patch(self, request: Request, pk: int, *args, **kwargs):
+    def put(self, request: Request, pk: int, *args, **kwargs):
         self.check_resource_and_authorization(request, pk)
-        return super().patch(request, *args, **kwargs)
+        return super().put(request, *args, **kwargs)
 
 
 class MarkAsCompletionView(APIView):
