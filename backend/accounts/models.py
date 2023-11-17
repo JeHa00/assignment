@@ -7,13 +7,17 @@ from common.models import Base
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username: str, password: str, **kwargs):
+    def create_user(self, username: str, password: str, team, **kwargs):
         if not username:
             raise ValueError("Please enter your username")
         if not password:
             raise ValueError("Please enter your password")
 
-        user = self.model(username=username, **kwargs)
+        user = self.model(
+            username=username,
+            team=team,
+            **kwargs,
+        )
         user.set_password(password)
         user.save(using=self._db)
 
