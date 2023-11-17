@@ -6,8 +6,8 @@ from accounts.test.conftest import (
     fake_another_user,
     fake_authorization_header,
 )
-from accounts.models import User
 from tasks.serializers import TaskSerializer
+from common.models import Base
 from tasks.models import Task
 
 
@@ -25,7 +25,7 @@ def fake_task(fake_user: dict) -> Task:
     data_to_be_created = {
         "title": f"{random_lower_string(k=100)}",
         "content": f"{random_lower_string(k=1000)}",
-        "team": User.TeamChoices.DANBIE,
+        "team": Base.TeamChoices.DANBIE,
     }
 
     serializer = TaskSerializer(data_to_be_created)
@@ -52,7 +52,7 @@ def fake_another_task(fake_another_user: dict) -> Task:
     data_to_be_created = {
         "title": f"{random_lower_string(k=100)}",
         "content": f"{random_lower_string(k=1000)}",
-        "team": User.TeamChoices.CHEOLLO,
+        "team": Base.TeamChoices.CHEOLLO,
     }
 
     serializer = TaskSerializer(data_to_be_created)
@@ -82,7 +82,7 @@ def fake_tasks(fake_user: dict) -> None:
         data_to_be_created = {
             "title": f"{random_lower_string(k=100)}",
             "content": f"{random_lower_string(k=1000)}",
-            "team": User.TeamChoices.BLABLA,
+            "team": Base.TeamChoices.BLABLA,
         }
 
         serializer = TaskSerializer(data_to_be_created)

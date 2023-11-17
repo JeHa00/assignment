@@ -7,6 +7,7 @@ import pytest
 from common.utils import random_lower_string
 from accounts.serializers import SignupSerializer
 from accounts.models import User
+from common.models import Base
 
 
 @pytest.fixture(scope="function")
@@ -20,7 +21,7 @@ def fake_user() -> dict:
     data_to_be_created = {
         "username": f"user-{random_lower_string(k=10)}",
         "password": random_lower_string(k=10),
-        "team": User.TeamChoices.DANBIE,
+        "team": Base.TeamChoices.DANBIE,
     }
 
     serializer = SignupSerializer(data_to_be_created)
@@ -58,7 +59,7 @@ def fake_another_user() -> dict:
     data_to_be_created = {
         "username": f"user-{random_lower_string(k=10)}",
         "password": random_lower_string(k=10),
-        "team": User.TeamChoices.CHEOLLO,
+        "team": Base.TeamChoices.CHEOLLO,
     }
 
     serializer = SignupSerializer(data_to_be_created)
