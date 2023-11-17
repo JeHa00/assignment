@@ -1,10 +1,9 @@
-import orjson
-
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
 import pytest
 
+from common.utils import random_lower_string
 from common.models import Base
 from tasks.serializers import TaskSerializer
 from tasks.models import Task
@@ -58,7 +57,72 @@ def test_get_task_if_not_exist_task(
 
 
 @pytest.mark.django_db
-@pytest.mark.update_task
+@pytest.mark.create_a_task
+def test_create_task_if_success(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_user: dict,
+):
+    url = reverse("task_list_create")
+
+    user = fake_user["user_object"]
+
+    title_max_length = 100
+    content_max_length = 1000
+
+    data_to_be_created = {
+        "create_user": user,
+        "title": f"{random_lower_string(k=title_max_length)}",
+        "content": f"{random_lower_string(k=content_max_length)}",
+        "team": user.team,
+    }
+
+    serializer = TaskSerializer(data_to_be_created)
+
+    response = client.post(
+        url,
+        serializer.data,
+        content_type="application/json",
+        headers=fake_authorization_header,
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    new_task = Task.objects.filter(id=1).last()
+
+    assert new_task.create_user == user
+
+
+@pytest.mark.django_db
+@pytest.mark.create_a_task
+def test_create_task_if_bad_request(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_user: dict,
+):
+    url = reverse("task_list_create")
+
+    title_max_length = 100
+    content_max_length = 1000
+
+    data_to_be_created = {
+        "title": f"{random_lower_string(k=title_max_length)}",
+        "content": f"{random_lower_string(k=content_max_length)}",
+    }
+
+    # 보낸 데이터에 team 정보가 없어서 발생
+    response = client.post(
+        url,
+        data_to_be_created,
+        content_type="application/json",
+        headers=fake_authorization_header,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_task
 def test_update_task_if_success(
     client: APIClient(),
     fake_authorization_header: dict,
@@ -100,7 +164,7 @@ def test_update_task_if_success(
 
 
 @pytest.mark.django_db
-@pytest.mark.update_task
+@pytest.mark.update_a_task
 def test_update_task_if_not_exist_task(
     client: APIClient(),
     fake_authorization_header: dict,
@@ -117,7 +181,7 @@ def test_update_task_if_not_exist_task(
 
 
 @pytest.mark.django_db
-@pytest.mark.update_task
+@pytest.mark.update_a_task
 def test_update_task_if_forbidden(
     client: APIClient(),
     fake_authorization_header: dict,

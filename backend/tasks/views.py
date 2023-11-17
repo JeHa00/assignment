@@ -6,7 +6,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status, exceptions
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import (
+    RetrieveUpdateDestroyAPIView,
+    ListCreateAPIView,
+)
 
 # Create your views here.
 from common.http_exceptions import CommonHttpException
@@ -19,6 +22,10 @@ class TaskListCreateView(ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(create_user=self.request.user)
+        return super().perform_create(serializer)
 
 
 class TaskView(RetrieveUpdateDestroyAPIView):

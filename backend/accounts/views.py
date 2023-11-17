@@ -40,7 +40,7 @@ class SignupView(CreateAPIView):
         Returns:
             Response: 성공 시, 201을 보내고 실패하면 400 코드를 보낸다.
         """
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -58,8 +58,8 @@ class LoginView(APIView):
         self,
         request: Request,
     ) -> Response:
-        username = request.data["username"]
-        password = request.data["password"]
+        username = request.data.get("username")
+        password = request.data.get("password")
 
         user = User.objects.filter(username=username).last()
 
