@@ -19,7 +19,6 @@ from tasks.models import Task
 
 
 class TaskListCreateView(ListCreateAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
@@ -27,11 +26,21 @@ class TaskListCreateView(ListCreateAPIView):
         serializer.save(create_user=self.request.user)
         return super().perform_create(serializer)
 
+    def get_queryset(self):
+        return (
+            Task.objects.filter(create_user=self.request.user)
+            .order_by("-created_at")
+            .all()
+        )
+
 
 class TaskView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+
+    # ModelClass = self.Meta.model
+    # instance = ModelClass._default_manager.create(**validated_data)
 
     def check_resource_and_authorization(
         self,

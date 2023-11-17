@@ -76,7 +76,7 @@ def fake_tasks(fake_user: dict) -> None:
     """
     user = fake_user.get("user_object")
 
-    total_count = 10
+    total_count = 30
 
     for _ in range(total_count):
         data_to_be_created = {

@@ -57,6 +57,34 @@ def test_get_task_if_not_exist_task(
 
 
 @pytest.mark.django_db
+@pytest.mark.get_tasks
+def test_get_tasks_if_success(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_tasks: None,
+):
+    url = reverse("task_list_create")
+
+    for page_number in range(1, 4):
+        response = client.get(
+            f"{url}?page={page_number}",
+            headers=fake_authorization_header,
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert "count" in response.data
+        assert response.data["count"] == 30
+
+        assert "previous" in response.data
+
+        assert "next" in response.data
+
+        assert "results" in response.data
+        assert len(response.data["results"]) == 10
+
+
+@pytest.mark.django_db
 @pytest.mark.create_a_task
 def test_create_task_if_success(
     client: APIClient(),
