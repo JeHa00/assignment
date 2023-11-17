@@ -4,7 +4,6 @@ from django.contrib.auth.hashers import check_password
 from django.urls import reverse
 import pytest
 
-from config.settings.base import API_V1_PREFIX
 from common.utils import random_lower_string
 from accounts.models import User
 
