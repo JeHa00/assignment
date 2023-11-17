@@ -8,7 +8,7 @@ from rest_framework.request import Request
 from rest_framework import status
 
 from common.http_exceptions import CommonHttpException, WRONG_PASSWORD
-from accounts.serializers import SignupSerializer, UserSerializer
+from accounts.serializers import SignupSerializer, LoginSerializer, UserSerializer
 from accounts.models import User
 
 
@@ -50,8 +50,8 @@ class SignupView(CreateAPIView):
 
 class LoginView(APIView):
     @extend_schema(
-        request=UserSerializer,
-        responses=UserSerializer,
+        request=LoginSerializer,
+        responses=LoginSerializer,
         summary="로그인 - username, password 정보 필요",
     )
     def post(
@@ -75,7 +75,7 @@ class LoginView(APIView):
 
         user_data = {
             "user_id": user.id,
-            "username": UserSerializer(user).data.get("username"),
+            "username": LoginSerializer(user).data.get("username"),
         }
 
         response = Response(
