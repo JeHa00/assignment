@@ -49,8 +49,8 @@ def test_get_task_if_not_exist_task(
     response = client.get(url, headers=fake_authorization_header)
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.data["detail"] == "찾을 수 없습니다."
-    assert response.data["detail"].code == "not_found"
+    assert response.data["detail"] == "해당되는 업무를 찾을 수 없습니다."
+    assert response.data["detail"].code == "TASK_NOT_FOUND"
 
 
 @pytest.mark.django_db
@@ -84,7 +84,7 @@ def test_mark_as_completion_if_not_exist_task(
     url = reverse("task_completion", args=[not_exist_task_id])
 
     response = client.patch(url, headers=fake_authorization_header)
-
+    
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.data["detail"] == "해당되는 업무를 찾을 수 없습니다."
     assert response.data["detail"].code == "TASK_NOT_FOUND"
@@ -136,10 +136,10 @@ def test_delete_task_if_not_exist_task(
     url = reverse("task", args=[not_exist_task_id])
 
     response = client.delete(url, headers=fake_authorization_header)
-
+    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.data["detail"] == "찾을 수 없습니다."
-    assert response.data["detail"].code == "not_found"
+    assert response.data["detail"] == "해당되는 업무를 찾을 수 없습니다."
+    assert response.data["detail"].code == "TASK_NOT_FOUND"
 
 
 @pytest.mark.django_db

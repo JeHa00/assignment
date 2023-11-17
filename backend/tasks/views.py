@@ -6,13 +6,19 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status, exceptions
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
 
 # Create your views here.
 from common.http_exceptions import CommonHttpException
 from tasks.serializers import TaskSerializer
+from common.enums import MarkAsCompletion
 from tasks.models import Task
-from tasks.enums import MarkAsCompletion
+
+
+class TaskListCreateView(ListCreateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class TaskView(RetrieveUpdateDestroyAPIView):
@@ -20,14 +26,38 @@ class TaskView(RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def check_resource_and_authorization(
+        self,
+        request: Request,
+        pk: int,
+        *args,
+        **kwargs,
+    ):
+        selected_task = Task.objects.filter(pk=pk).last()
 
-        if instance.create_user.id != request.user.id:
+        if not selected_task:
+            raise CommonHttpException.TASK_NOT_FOUND_ERROR
+
+        if selected_task.create_user.id != request.user.id:
             raise exceptions.PermissionDenied
 
-        instance.delete()
+        return selected_task
+
+    def retrieve(self, request: Request, pk: int, *args, **kwargs):
+        self.check_resource_and_authorization(request, pk)
+        return super().retrieve(request, *args, **kwargs)
+
+    def destroy(self, request: Request, pk: int, *args, **kwargs):
+        selected_task = self.check_resource_and_authorization(
+            request, pk, *args, **kwargs
+        )
+
+        selected_task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request: Request, pk: int, *args, **kwargs):
+        self.check_resource_and_authorization(request, pk)
+        return super().patch(request, *args, **kwargs)
 
 
 class MarkAsCompletionView(APIView):
@@ -48,7 +78,11 @@ class MarkAsCompletionView(APIView):
             MarkAsCompletion.completed_at: datetime.now(),
         }
 
-        serializer = self.serializer_class(selected_task, initial_data, partial=True)
+        serializer = self.serializer_class(
+            selected_task,
+            data=initial_data,
+            partial=True,
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -56,9 +90,3 @@ class MarkAsCompletionView(APIView):
             {"message": "success to mark as completion"},
             status=status.HTTP_200_OK,
         )
-
-
-# Task 상세 정보 조회
-
-
-# Task 전체 목록 조회
