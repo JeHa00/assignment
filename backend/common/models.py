@@ -18,7 +18,7 @@ class Base(models.Model):
         blank=False,
     )
     created_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
-    modified_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
+    modified_at = models.DateTimeField(verbose_name="생성일", auto_now=True)
 
     class Meta:
         abstract = True
@@ -26,7 +26,12 @@ class Base(models.Model):
 
 class BaseModel(Base):
     is_completed = models.BooleanField(verbose_name="완료 유무", default=False)
-    completed_at = models.DateTimeField(verbose_name="완료일", auto_now=True)
+    completed_at = models.DateTimeField(
+        verbose_name="완료일",
+        auto_now=False,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         abstract = True
