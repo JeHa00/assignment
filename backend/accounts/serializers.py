@@ -17,12 +17,12 @@ class SignupSerializer(serializers.ModelSerializer):
         )
         return user
 
+    def validate_password(self, data):
+        password_validation.validate_password(data, self.instance)
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "password"]
-
-    def validate_password(self, data):
-        password_validation.validate_password(data, self.instance)
-        return data
