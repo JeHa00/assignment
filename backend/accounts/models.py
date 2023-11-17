@@ -7,34 +7,17 @@ from common.models import Base
 
 
 class UserManager(BaseUserManager):
-    def _create_user(
-        self,
-        username: str,
-        password: str,
-        is_staff: bool,
-        is_superuser: bool,
-        **extra_fields,
-    ):
-        if not username or not password:
-            raise ValueError("username과 password는 반드시 입력해야 합니다.")
+    def create_user(self, username: str, password: str, **kwargs):
+        if not username:
+            raise ValueError("Please enter your username")
+        if not password:
+            raise ValueError("Please enter your password")
 
-        user: User = self.model(
-            username=username,
-            is_staff=is_staff,
-            is_superuser=is_superuser,
-            **extra_fields,
-        )
-
+        user = self.model(username=username, **kwargs)
         user.set_password(password)
         user.save(using=self._db)
 
         return user
-
-    def create_user(self, username: str, password: str, **extra_fields):
-        return self._create_user(username, password, False, False, **extra_fields)
-
-    def create_superuser(self, username, password, **extra_fields):
-        return self._create_user(username, password, True, True, **extra_fields)
 
 
 class User(AbstractBaseUser, Base):
@@ -54,9 +37,8 @@ class User(AbstractBaseUser, Base):
         },
     )
 
-    objects = UserManager()
-
     USERNAME_FIELD = "username"
+    objects = UserManager()
 
     def __str__(self) -> str:
         return f"User(username={self.username}, team={self.team})"

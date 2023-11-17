@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 
 from common.utils import random_lower_string
@@ -7,7 +9,7 @@ from accounts.models import User
 
 @pytest.fixture(scope="function")
 @pytest.mark.django_db
-def fake_user() -> User:
+def fake_user() -> dict:
     """테스트용 유저를 1명 생성한다.
 
     Returns:
@@ -21,6 +23,8 @@ def fake_user() -> User:
 
     serializer = UserSerializer(data_to_be_created)
 
-    new_user = User.objects.create(**serializer.data)
+    new_user = User.objects.create_user(**serializer.data)
 
-    return new_user
+    data_to_be_created.pop("team")
+
+    return {"user_object": new_user, "login_data": deepcopy(data_to_be_created)}
