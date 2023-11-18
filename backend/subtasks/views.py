@@ -8,132 +8,137 @@ from rest_framework import status, exceptions
 from rest_framework.views import APIView
 from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
-    ListCreateAPIView,
+    CreateAPIView,
+    ListAPIView,
 )
 
-from common.http_exceptions import CommonHttpException
-from tasks.serializers import TaskSerializer
+from common.http_exceptions import CommonHttpException, CompletedSubtaskError
 from common.enums import MarkAsCompletion
+from common.permissions import IsAuthorized
+from tasks.models import Task
+from subtasks.serializers import SubtaskSerializer
 from subtasks.models import SubTask
 
 
-class SubtaskListCreateView(ListCreateAPIView):
-    serializer_class = TaskSerializer
+class SubTaskListView(ListAPIView):
+    serializer_class = SubtaskSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
-        summary="새로운 Subtask 객체 생성",
-    )
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
-    @extend_schema(
-        tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
         summary="Subtask 객체 목록 조회",
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
-        serializer.save(create_user=self.request.user)
-        return super().perform_create(serializer)
-
     def get_queryset(self):
         return (
-            SubTask.objects.filter(create_user=self.request.user)
+            SubTask.objects.filter(team=self.request.user.team)
             .order_by("-created_at")
             .all()
         )
 
 
-class SubtaskView(RetrieveUpdateDestroyAPIView):
-    queryset = SubTask.objects.all()
-    serializer_class = TaskSerializer
+class SubtaskCreateView(CreateAPIView):
+    serializer_class = SubtaskSerializer
     permission_classes = [IsAuthenticated]
-
-    # ModelClass = self.Meta.model
-    # instance = ModelClass._default_manager.create(**validated_data)
-
-    def check_resource_and_authorization(
-        self,
-        request: Request,
-        pk: int,
-        *args,
-        **kwargs,
-    ):
-        selected_task = SubTask.objects.filter(pk=pk).last()
-
-        if not selected_task:
-            raise CommonHttpException.TASK_NOT_FOUND_ERROR
-
-        if selected_task.create_user.id != request.user.id:
-            raise exceptions.PermissionDenied
-
-        return selected_task
+    selected_task = None
 
     @extend_schema(
         tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
+        summary="새로운 Subtask 객체 생성",
+    )
+    def post(self, request, *args, **kwargs):
+        selected_task = Task.objects.filter(id=kwargs.get("task_id")).last()
+        if not selected_task:
+            raise CommonHttpException.TASK_NOT_FOUND_ERROR
+        self.selected_task = selected_task
+        return super().post(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(task=self.selected_task)
+
+
+class SubtaskView(RetrieveUpdateDestroyAPIView):
+    queryset = SubTask.objects.all()
+    serializer_class = SubtaskSerializer
+    permission_classes = [IsAuthenticated, IsAuthorized]
+
+    def check_and_handle_not_found_error(self, request: Request, pk: int,):
+        selected_subtask = SubTask.objects.filter(pk=pk).last()
+
+        if not selected_subtask:
+            raise CommonHttpException.SUBTASK_NOT_FOUND_ERROR
+
+        return selected_subtask
+
+    @extend_schema(
+        tags=["Subtask"],
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
         summary="특정 Subtask 객체 조회",
     )
     def get(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk)
+        self.check_and_handle_not_found_error(request, pk)
         return super().get(request, *args, **kwargs)
 
     @extend_schema(
         tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
         summary="특정 Subtask 삭제",
     )
     def delete(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk, *args, **kwargs)
+        self.check_and_handle_not_found_error(request, pk)
         return super().delete(request, pk, *args, **kwargs)
+
+    def perform_destroy(self, instance: SubTask):
+        if instance.is_completed:
+            raise CompletedSubtaskError
+        return instance.delete()
 
     @extend_schema(
         tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
         summary="특정 Subtask 정보 수정",
     )
     def put(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk)
+        self.check_and_handle_not_found_error(request, pk)
         return super().put(request, *args, **kwargs)
 
     @extend_schema(
         tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
         summary="특정 Subtask 정보 수정",
     )
     def patch(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk)
+        self.check_and_handle_not_found_error(request, pk)
         return super().patch(request, *args, **kwargs)
 
 
 class MarkAsCompletionView(APIView):
-    serializer_class = TaskSerializer
+    serializer_class = SubtaskSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         tags=["Subtask"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=SubtaskSerializer,
+        responses=SubtaskSerializer,
         summary="완료표시 - 해당 Subtask 객체를 완료 상태로 변경",
     )
     def patch(self, request: Request, pk: int) -> Response:
-        selected_task = SubTask.objects.filter(id=pk).last()
+        selected_subtask = SubTask.objects.filter(id=pk).last()
 
-        if not selected_task:
-            raise CommonHttpException.TASK_NOT_FOUND_ERROR
+        if not selected_subtask:
+            raise CommonHttpException.SUBTASK_NOT_FOUND_ERROR
 
-        if selected_task.create_user.id != request.user.id:
+        if selected_subtask.team != request.user.team:
             raise exceptions.PermissionDenied
 
         initial_data = {
@@ -142,7 +147,7 @@ class MarkAsCompletionView(APIView):
         }
 
         serializer = self.serializer_class(
-            selected_task,
+            selected_subtask,
             data=initial_data,
             partial=True,
         )

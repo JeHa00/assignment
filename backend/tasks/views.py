@@ -12,8 +12,9 @@ from rest_framework.generics import (
 )
 
 from common.http_exceptions import CommonHttpException
-from tasks.serializers import TaskSerializer
 from common.enums import MarkAsCompletion
+from common.permissions import IsAuthorized
+from tasks.serializers import TaskSerializer
 from tasks.models import Task
 
 
@@ -54,25 +55,17 @@ class TaskListCreateView(ListCreateAPIView):
 class TaskView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAuthorized]
 
-    # ModelClass = self.Meta.model
-    # instance = ModelClass._default_manager.create(**validated_data)
-
-    def check_resource_and_authorization(
+    def check_and_handle_not_found_error(
         self,
         request: Request,
         pk: int,
-        *args,
-        **kwargs,
     ):
         selected_task = Task.objects.filter(pk=pk).last()
 
         if not selected_task:
             raise CommonHttpException.TASK_NOT_FOUND_ERROR
-
-        if selected_task.create_user.id != request.user.id:
-            raise exceptions.PermissionDenied
 
         return selected_task
 
@@ -83,7 +76,7 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         summary="특정 Task 객체 조회",
     )
     def get(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk)
+        self.check_and_handle_not_found_error(request, pk)
         return super().get(request, *args, **kwargs)
 
     @extend_schema(
@@ -93,7 +86,7 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         summary="특정 Task 객체 삭제",
     )
     def delete(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk, *args, **kwargs)
+        self.check_and_handle_not_found_error(request, pk)
         return super().delete(request, pk, *args, **kwargs)
 
     @extend_schema(
@@ -103,7 +96,7 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         summary="특정 Task 객체 정보 수정",
     )
     def put(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk)
+        self.check_and_handle_not_found_error(request, pk)
         return super().put(request, *args, **kwargs)
 
     @extend_schema(
@@ -113,7 +106,7 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         summary="특정 Task 객체 정보 수정",
     )
     def patch(self, request: Request, pk: int, *args, **kwargs):
-        self.check_resource_and_authorization(request, pk)
+        self.check_and_handle_not_found_error(request, pk)
         return super().patch(request, *args, **kwargs)
 
 
