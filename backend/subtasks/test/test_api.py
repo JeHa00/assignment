@@ -3,11 +3,10 @@ from rest_framework import status
 from django.urls import reverse
 import pytest
 
-from common.utils import random_lower_string
 from common.models import Base
 from tasks.models import Task
-from subtasks.serializers import SubtaskSerializer
 from subtasks.models import SubTask
+from subtasks.serializers import SubtaskSerializer
 
 
 @pytest.mark.django_db
@@ -121,6 +120,53 @@ def test_create_subtask_if_not_found_task(
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_success(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_subtask: SubTask,
+):
+    url = reverse("subtask", args=[fake_subtask.id])
+
+    assert fake_subtask.team == Base.TeamChoices.DANBIE
+
+    data_to_be_updated = {"team": Base.TeamChoices.BLABLA}
+
+    response = client.patch(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    refreshed_subtask = SubTask.objects.filter(id=fake_subtask.id).last()
+
+    assert refreshed_subtask.team == Base.TeamChoices.BLABLA
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_bad_request(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_subtask: SubTask,
+):
+    url = reverse("subtask", args=[fake_subtask.id])
+
+    data_to_be_updated = {"team": None}
+
+    response = client.patch(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
