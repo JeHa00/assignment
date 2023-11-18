@@ -70,21 +70,33 @@ def fake_another_subtask(fake_task: Task) -> SubTask:
 
 @pytest.fixture(scope="function")
 @pytest.mark.django_db
-def fake_subtasks(fake_task: dict) -> None:
+def fake_subtasks(
+    fake_task: Task,
+    fake_another_task: Task,
+) -> None:
     """fake_task의 하위업무 subtask를 테스트용으로 10개 생성한다.
+        생성된 하위 업무는 모두  DANBIE 팀에 속한다.
+        하위 업무 5개의 상위 업무 담당 팀은 동일하게 DANBIE,
+        나머지 5개의 상위 업무 담당 팀은 CHELLO 로 다르다.
 
     Args:
-        fake_task (dict): 테스트용 업무 1개를 생성하는 fixture
+        fake_task (Task): 테스트용 업무 1개를 생성하는 fixture
 
     """
-    total_count = 30
+    total_count = 10
 
-    for _ in range(total_count):
+    for id in range(total_count):
         data_to_be_created = {"team": Base.TeamChoices.DANBIE}
 
         serializer = SubtaskSerializer(data_to_be_created)
 
-        SubTask.objects.create(
-            task=fake_task,
-            **serializer.data,
-        )
+        if id < 5:
+            SubTask.objects.create(
+                task=fake_task,  # DANBIE team
+                **serializer.data,
+            )
+        else:
+            SubTask.objects.create(
+                task=fake_another_task,  # CHELLO team
+                **serializer.data,
+            )
