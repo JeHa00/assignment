@@ -24,7 +24,7 @@ class SubTask(BaseModel):
 
 
 @receiver(post_save, sender=SubTask)
-def detect_task_and_mark_as_completion(
+def detect_subtask_and_mark_as_completion(
     sender,
     instance: SubTask,
     **kwargs,
