@@ -11,7 +11,6 @@ from rest_framework.generics import (
     ListCreateAPIView,
 )
 
-# Create your views here.
 from common.http_exceptions import CommonHttpException
 from tasks.serializers import TaskSerializer
 from common.enums import MarkAsCompletion
@@ -21,6 +20,24 @@ from tasks.models import Task
 class TaskListCreateView(ListCreateAPIView):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="새로운 Task 객체 생성",
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="Task 객체 목록 조회",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(create_user=self.request.user)
@@ -59,27 +76,57 @@ class TaskView(RetrieveUpdateDestroyAPIView):
 
         return selected_task
 
-    def retrieve(self, request: Request, pk: int, *args, **kwargs):
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="특정 Task 객체 조회",
+    )
+    def get(self, request: Request, pk: int, *args, **kwargs):
         self.check_resource_and_authorization(request, pk)
-        return super().retrieve(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
-    def destroy(self, request: Request, pk: int, *args, **kwargs):
-        selected_task = self.check_resource_and_authorization(
-            request, pk, *args, **kwargs
-        )
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="특정 Task 객체 삭제",
+    )
+    def delete(self, request: Request, pk: int, *args, **kwargs):
+        self.check_resource_and_authorization(request, pk, *args, **kwargs)
+        return super().delete(request, pk, *args, **kwargs)
 
-        selected_task.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="특정 Task 객체 정보 수정",
+    )
     def put(self, request: Request, pk: int, *args, **kwargs):
         self.check_resource_and_authorization(request, pk)
         return super().put(request, *args, **kwargs)
+
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="특정 Task 객체 정보 수정",
+    )
+    def patch(self, request: Request, pk: int, *args, **kwargs):
+        self.check_resource_and_authorization(request, pk)
+        return super().patch(request, *args, **kwargs)
 
 
 class MarkAsCompletionView(APIView):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        tags=["Task"],
+        request=TaskSerializer,
+        responses=TaskSerializer,
+        summary="완료표시 - 해당 Task 객체를 완료 상태로 변경",
+    )
     def patch(self, request: Request, pk: int) -> Response:
         selected_task = Task.objects.filter(id=pk).last()
 

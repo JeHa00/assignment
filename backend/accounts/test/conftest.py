@@ -5,6 +5,7 @@ from django.urls import reverse
 import pytest
 
 from common.utils import random_lower_string
+from accounts.enums import UserInformation, TokenInformation
 from accounts.serializers import SignupSerializer
 from accounts.models import User
 from common.models import Base
@@ -43,7 +44,7 @@ def fake_authorization_header(
 
     response = client.post(reverse("login"), login_data)
 
-    access_token = response.data["token_information"]["access_token"]
+    access_token = response.data[TokenInformation.token][TokenInformation.access_token]
 
     return {"Authorization": f"Bearer {access_token}"}
 

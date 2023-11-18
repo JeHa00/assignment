@@ -286,7 +286,7 @@ def test_mark_as_completion_if_forbidden(
 
 
 @pytest.mark.django_db
-@pytest.mark.delete_task
+@pytest.mark.delete_a_task
 def test_delete_task_if_success(
     client: APIClient(),
     fake_authorization_header: dict,
@@ -302,7 +302,7 @@ def test_delete_task_if_success(
 
 
 @pytest.mark.django_db
-@pytest.mark.delete_task
+@pytest.mark.delete_a_task
 def test_delete_task_if_not_exist_task(
     client: APIClient(),
     fake_authorization_header: dict,
@@ -318,7 +318,7 @@ def test_delete_task_if_not_exist_task(
 
 
 @pytest.mark.django_db
-@pytest.mark.delete_task
+@pytest.mark.delete_a_task
 def test_delete_task_if_forbidden(
     client: APIClient(),
     fake_authorization_header: dict,
