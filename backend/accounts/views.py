@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 
-from common.http_exceptions import CommonHttpException, WRONG_PASSWORD
+from common.http_exceptions import CommonHttpException, WrongPasswordError
 from accounts.serializers import (
     SignupSerializer,
     LoginSerializer,
@@ -21,6 +21,7 @@ class SignupView(CreateAPIView):
     serializer_class = SignupSerializer
 
     @extend_schema(
+        tags=["Account"],
         request=SignupSerializer,
         responses=SignupSerializer,
         summary="회원가입 - username, password, team 소속 정보 필요",
@@ -55,6 +56,7 @@ class SignupView(CreateAPIView):
 
 class LoginView(APIView):
     @extend_schema(
+        tags=["Account"],
         request=LoginSerializer,
         responses=LoginSerializer,
         summary="로그인 - username, password 정보 필요",
@@ -72,7 +74,7 @@ class LoginView(APIView):
             raise CommonHttpException.USER_NOT_FOUND_ERROR
 
         if not check_password(password, user.password):
-            raise WRONG_PASSWORD
+            raise WrongPasswordError
 
         token = TokenObtainPairSerializer.get_token(user)
         refresh_token = str(token)
@@ -112,6 +114,7 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     @extend_schema(
+        tags=["Account"],
         request=UserSerializer,
         responses=UserSerializer,
         summary="로그아웃 - 토큰 정보 삭제",
