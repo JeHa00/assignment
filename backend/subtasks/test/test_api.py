@@ -6,7 +6,6 @@ import pytest
 from common.models import Base
 from tasks.models import Task
 from subtasks.models import SubTask
-from subtasks.serializers import SubtaskSerializer
 
 
 @pytest.mark.django_db
@@ -66,7 +65,6 @@ def test_get_subtasks_if_success(
             f"{url}?page={page_number}",
             headers=fake_authorization_header,
         )
-
         assert response.status_code == status.HTTP_200_OK
 
         assert "count" in response.data

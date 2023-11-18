@@ -79,7 +79,7 @@ def fake_subtasks(fake_task: dict) -> None:
     total_count = 30
 
     for _ in range(total_count):
-        data_to_be_created = {"team": Base.TeamChoices.BLABLA}
+        data_to_be_created = {"team": Base.TeamChoices.DANBIE}
 
         serializer = SubtaskSerializer(data_to_be_created)
 
