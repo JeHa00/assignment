@@ -8,7 +8,12 @@ from rest_framework.request import Request
 from rest_framework import status
 
 from common.http_exceptions import CommonHttpException, WRONG_PASSWORD
-from accounts.serializers import SignupSerializer, LoginSerializer, UserSerializer
+from accounts.serializers import (
+    SignupSerializer,
+    LoginSerializer,
+    UserSerializer,
+)
+from accounts.enums import UserInformation, TokenInformation
 from accounts.models import User
 
 
@@ -58,8 +63,8 @@ class LoginView(APIView):
         self,
         request: Request,
     ) -> Response:
-        username = request.data.get("username")
-        password = request.data.get("password")
+        username = request.data.get(UserInformation.username)
+        password = request.data.get(UserInformation.password)
 
         user = User.objects.filter(username=username).last()
 
@@ -74,24 +79,34 @@ class LoginView(APIView):
         access_token = str(token.access_token)
 
         user_data = {
-            "user_id": user.id,
-            "username": LoginSerializer(user).data.get("username"),
+            UserInformation.user_id: user.id,
+            UserInformation.username: LoginSerializer(user).data.get(
+                UserInformation.username
+            ),
         }
 
         response = Response(
             {
                 "user_data": user_data,
                 "message": "LOGIN_SUCCESS",
-                "token_information": {
-                    "access_token": access_token,
-                    "refresh_token": refresh_token,
+                TokenInformation.token: {
+                    TokenInformation.access_token: access_token,
+                    TokenInformation.refresh_token: refresh_token,
                 },
             },
             status=status.HTTP_200_OK,
         )
 
-        response.set_cookie("access_token", access_token, httponly=True)
-        response.set_cookie("refresh_token", refresh_token, httponly=True)
+        response.set_cookie(
+            TokenInformation.access_token,
+            access_token,
+            httponly=True,
+        )
+        response.set_cookie(
+            TokenInformation.refresh_token,
+            refresh_token,
+            httponly=True,
+        )
         return response
 
 
@@ -99,13 +114,13 @@ class LogoutView(APIView):
     @extend_schema(
         request=UserSerializer,
         responses=UserSerializer,
-        summary="로그아웃: 토큰 정보 삭제",
+        summary="로그아웃 - 토큰 정보 삭제",
     )
     def delete(self, request: Request) -> Response:
         response = Response(
-            {"message": "logout success"},
+            {"message": "LOGOUT_SUCCESS"},
             status=status.HTTP_202_ACCEPTED,
         )
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
+        response.delete_cookie(TokenInformation.access_token)
+        response.delete_cookie(TokenInformation.refresh_token)
         return response

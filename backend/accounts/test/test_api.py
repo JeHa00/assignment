@@ -63,8 +63,8 @@ def test_login_if_success(client: APIClient(), fake_user: dict):
 
     user_data = response.data["user_data"]
 
-    assert "token_information" in response.data
-    token_data = response.data["token_information"]
+    assert "token" in response.data
+    token_data = response.data["token"]
 
     assert "user_id" in user_data
     assert user_data["user_id"] == user.id
@@ -127,7 +127,7 @@ def test_logout_if_success(
 
     response = client.post(login_url, login_data)
 
-    access_token = response.data["token_information"]["access_token"]
+    access_token = response.data["token"]["access_token"]
 
     # 로그아웃 후, 토큰 정보 삭제 확인
     logout_url = reverse("logout")
