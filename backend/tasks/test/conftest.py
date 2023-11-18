@@ -80,12 +80,15 @@ def fake_tasks(fake_user: dict) -> None:
 
     total_count = 30
 
-    for _ in range(total_count):
+    for id in range(total_count):
         data_to_be_created = {
             "title": f"{random_lower_string(k=100)}",
             "content": f"{random_lower_string(k=1000)}",
-            "team": Base.TeamChoices.BLABLA,
         }
+        if id < 15:
+            data_to_be_created["team"] = Base.TeamChoices.DANBIE
+        else:
+            data_to_be_created["team"] = Base.TeamChoices.BLABLA
 
         serializer = TaskSerializer(data_to_be_created)
 
