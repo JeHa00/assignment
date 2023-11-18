@@ -190,3 +190,34 @@ def test_delete_subtask_if_forbidden(
     assert response.data["detail"].code == "permission_denied"
 
     assert SubTask.objects.filter(id=fake_another_subtask.id).exists() is True
+
+
+@pytest.mark.django_db
+@pytest.mark.delete_a_subtask
+def test_delete_subtask_if_completed_subtask(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_subtask: Task,
+):
+    # 완료 처리 하기
+    url = reverse("subtask_completion", args=[fake_subtask.id])
+
+    assert fake_subtask.is_completed is False
+
+    response = client.patch(url, headers=fake_authorization_header)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["message"] == "success to mark as completion"
+
+    refreshed_task = SubTask.objects.filter(id=fake_subtask.id).last()
+
+    assert refreshed_task.is_completed is True
+
+    # 완료 처리된 하위 업무 삭제 시도
+    url = reverse("subtask", args=[fake_subtask.id])
+
+    response = client.delete(url, headers=fake_authorization_header)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["detail"] == "이미 완료된 하위업무이기 때문에 삭제할 수 없습니다."
+    assert response.data["detail"].code == "COMPLETED_SUBTASK_ERROR"
