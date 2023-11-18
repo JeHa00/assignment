@@ -17,5 +17,6 @@ class Task(BaseModel):
         return f"Task(team={self.team}, is_completed={self.is_completed})"
 
     class Meta:
+        db_table = "tasks"
         verbose_name = "업무 내역"
         verbose_name_plural = "업무 목록"

@@ -19,6 +19,7 @@ class SubTask(BaseModel):
         return f"SubTask(team={self.team}, is_completed={self.is_completed})"
 
     class Meta:
+        db_table = "subtasks"
         verbose_name = "하위업무 내역"
         verbose_name_plural = "하위업무 목록"
 

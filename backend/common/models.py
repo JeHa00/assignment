@@ -14,8 +14,6 @@ class Base(models.Model):
     team = models.CharField(
         max_length=10,
         choices=TeamChoices.choices,
-        null=False,
-        blank=False,
         verbose_name="팀 소속",
     )
     created_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)

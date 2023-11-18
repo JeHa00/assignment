@@ -39,7 +39,6 @@ class User(AbstractBaseUser, Base):
         error_messages={
             "unique": _("A user with that username already exists."),
         },
-        verbose_name="유저 이름",
     )
 
     USERNAME_FIELD = "username"
@@ -49,5 +48,6 @@ class User(AbstractBaseUser, Base):
         return f"User(username={self.username}, team={self.team})"
 
     class Meta:
+        db_table = "users"
         verbose_name = "직원"
         verbose_name_plural = "직원 목록"
