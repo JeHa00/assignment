@@ -9,17 +9,20 @@ from rest_framework.generics import (
     ListCreateAPIView,
 )
 from django.utils import timezone
+from django.db.models import Q
 
 from common.http_exceptions import CommonHttpException
 from common.enums import MarkAsCompletion
 from common.permissions import IsAuthorized
-from tasks.serializers import TaskSerializer
+from common.models import Base
+from tasks.serializers import TaskSerializer, TaskDetailSerializer
 from tasks.models import Task
 
 
 class TaskListCreateView(ListCreateAPIView):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    user_team = None
 
     @extend_schema(
         tags=["Task"],
@@ -37,6 +40,7 @@ class TaskListCreateView(ListCreateAPIView):
         summary="Task 객체 목록 조회",
     )
     def get(self, request, *args, **kwargs):
+        self.user_team = request.user.team
         return super().get(request, *args, **kwargs)
 
     def perform_create(self, serializer):
@@ -44,16 +48,14 @@ class TaskListCreateView(ListCreateAPIView):
         return super().perform_create(serializer)
 
     def get_queryset(self):
-        return (
-            Task.objects.filter(create_user=self.request.user)
-            .order_by("-created_at")
-            .all()
+        return Task.objects.prefetch_related("subtasks").filter(
+            Q(team=self.user_team) | Q(subtasks__team=self.user_team)
         )
 
 
 class TaskView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated, IsAuthorized]
 
     def check_and_handle_not_found_error(
@@ -70,8 +72,8 @@ class TaskView(RetrieveUpdateDestroyAPIView):
 
     @extend_schema(
         tags=["Task"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=TaskDetailSerializer,
+        responses=TaskDetailSerializer,
         summary="특정 Task 객체 조회",
     )
     def get(self, request: Request, pk: int, *args, **kwargs):
@@ -80,8 +82,8 @@ class TaskView(RetrieveUpdateDestroyAPIView):
 
     @extend_schema(
         tags=["Task"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=TaskDetailSerializer,
+        responses=TaskDetailSerializer,
         summary="특정 Task 객체 삭제",
     )
     def delete(self, request: Request, pk: int, *args, **kwargs):
@@ -90,8 +92,8 @@ class TaskView(RetrieveUpdateDestroyAPIView):
 
     @extend_schema(
         tags=["Task"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=TaskDetailSerializer,
+        responses=TaskDetailSerializer,
         summary="특정 Task 객체 정보 수정",
     )
     def put(self, request: Request, pk: int, *args, **kwargs):
@@ -100,8 +102,8 @@ class TaskView(RetrieveUpdateDestroyAPIView):
 
     @extend_schema(
         tags=["Task"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=TaskDetailSerializer,
+        responses=TaskDetailSerializer,
         summary="특정 Task 객체 정보 수정",
     )
     def patch(self, request: Request, pk: int, *args, **kwargs):
@@ -110,13 +112,13 @@ class TaskView(RetrieveUpdateDestroyAPIView):
 
 
 class MarkAsCompletionView(APIView):
-    serializer_class = TaskSerializer
+    serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         tags=["Task"],
-        request=TaskSerializer,
-        responses=TaskSerializer,
+        request=TaskDetailSerializer,
+        responses=TaskDetailSerializer,
         summary="완료표시 - 해당 Task 객체를 완료 상태로 변경",
     )
     def patch(self, request: Request, pk: int) -> Response:
