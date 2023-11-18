@@ -3,6 +3,9 @@ from rest_framework import status
 from django.urls import reverse
 import pytest
 
+# flake8: noqa
+from subtasks.test.conftest import fake_subtasks
+
 from common.utils import random_lower_string
 from common.models import Base
 from tasks.serializers import TaskSerializer
@@ -62,10 +65,11 @@ def test_get_tasks_if_success(
     client: APIClient(),
     fake_authorization_header: dict,
     fake_tasks: None,
+    fake_subtasks: None,
 ):
     url = reverse("task_list_create")
 
-    for page_number in range(1, 3):
+    for page_number in range(1, 6):
         response = client.get(
             f"{url}?page={page_number}",
             headers=fake_authorization_header,
@@ -74,8 +78,9 @@ def test_get_tasks_if_success(
 
         assert "count" in response.data
 
-        # fake_tasks에서 30개가 생성되지만 직원의 팀과 동일한 업무 소속은 15개.
-        assert response.data["count"] == 15
+        # fake_tasks에서 30개가 생성되지만 인증 정보에 담긴 직원의 팀과 동일한 업무 소속은 15개.
+        # fake_subtasks에서 인증 정보에 담긴 직원의 팀과 동일한 하위 업무 30개.
+        assert response.data["count"] == 45
 
         assert "previous" in response.data
 
@@ -84,7 +89,7 @@ def test_get_tasks_if_success(
         assert "results" in response.data
 
         # REST FRAMEWORK의 PAGE 사이즈가 10
-        assert len(response.data["results"]) == 10 if page_number == 1 else 5
+        assert len(response.data["results"]) == 10 if page_number != 5 else 5
 
 
 @pytest.mark.django_db

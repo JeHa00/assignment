@@ -74,23 +74,23 @@ def fake_subtasks(
     fake_task: Task,
     fake_another_task: Task,
 ) -> None:
-    """fake_task의 하위업무 subtask를 테스트용으로 10개 생성한다.
+    """fake_task의 하위업무 subtask를 테스트용으로 30개 생성한다.
         생성된 하위 업무는 모두  DANBIE 팀에 속한다.
-        하위 업무 5개의 상위 업무 담당 팀은 동일하게 DANBIE,
-        나머지 5개의 상위 업무 담당 팀은 CHELLO 로 다르다.
+        하위 업무 15개의 상위 업무 담당 팀은 동일하게 DANBIE,
+        나머지 15개의 상위 업무 담당 팀은 CHELLO 로 다르다.
 
     Args:
         fake_task (Task): 테스트용 업무 1개를 생성하는 fixture
 
     """
-    total_count = 10
+    total_count = 30
 
     for id in range(total_count):
         data_to_be_created = {"team": Base.TeamChoices.DANBIE}
 
         serializer = SubtaskSerializer(data_to_be_created)
 
-        if id < 5:
+        if id < 15:
             SubTask.objects.create(
                 task=fake_task,  # DANBIE team
                 **serializer.data,

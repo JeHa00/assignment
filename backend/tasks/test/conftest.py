@@ -8,6 +8,7 @@ from accounts.test.conftest import (
     fake_another_user,
     fake_authorization_header,
 )
+
 from tasks.serializers import TaskSerializer
 from common.models import Base
 from tasks.models import Task
