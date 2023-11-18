@@ -51,3 +51,31 @@ def test_get_subtask_if_not_exist_task(
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.data["detail"] == "해당되는 하위 업무를 찾을 수 없습니다."
     assert response.data["detail"].code == "SUBTASK_NOT_FOUND"
+
+
+@pytest.mark.django_db
+@pytest.mark.get_subtasks
+def test_get_subtasks_if_success(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_subtasks: None,
+):
+    url = reverse("subtask_list_create")
+
+    for page_number in range(1, 4):
+        response = client.get(
+            f"{url}?page={page_number}",
+            headers=fake_authorization_header,
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+
+        assert "count" in response.data
+        assert response.data["count"] == 30
+
+        assert "previous" in response.data
+
+        assert "next" in response.data
+
+        assert "results" in response.data
+        assert len(response.data["results"]) == 10
