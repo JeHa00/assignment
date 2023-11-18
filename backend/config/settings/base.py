@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 INSTALLED_APPS += [
     "rest_framework",
     "rest_framework.authtoken",
-    "dj_rest_auth",
+    "rest_framework_simplejwt",
     "drf_spectacular",
     "corsheaders",
 ]
@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "ko-kr"
+LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Asia/Seoul"
 
@@ -148,10 +148,10 @@ REST_FRAMEWORK = {
     # YOUR SETTINGS
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 5,
+    "PAGE_SIZE": 10,
 }
 
 SIMPLE_JWT = {
@@ -181,15 +181,4 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
-REST_AUTH = {
-    "USE_JWT": True,
-    "JWT_AUTH_COOKIE": "Bearer",
-    "JWT_AUTH_REFRESH_COOKIE": True,
-    "JWT_AUTH_REFRESH_COOKIE_PATH": "/refresh",
-    "JWT_AUTH_SECURE": False,
-    "JWT_AUTH_HTTPONLY": True,
-    "JWT_AUTH_SAMESITE": "Lax",
-    "JWT_AUTH_RETURN_EXPIRATION": False,
-    "JWT_AUTH_COOKIE_USE_CSRF": False,
-    "JWT_AUTH_COOKIE_ENFORCE_CSRF_ON_UNAUTHENTICATED": False,
-}
+APPEND_SLASH = False

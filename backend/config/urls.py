@@ -19,7 +19,11 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
 from django.conf import settings
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from config.settings.base import API_V1_PREFIX
@@ -34,12 +38,14 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-swagger-ui",
     ),
-    # dj-rest-auth
-    path("dj-rest-auth/", include("dj_rest_auth.urls")),
+    # simplejwt,
+    path("api/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/verification", TokenVerifyView.as_view(), name="token_verify"),
+    path("api/token/refresh-token", TokenRefreshView.as_view(), name="token_refresh"),
     # locals
-    path(f"{API_V1_PREFIX}/accounts/", include("accounts.urls")),
-    path(f"{API_V1_PREFIX}/tasks/", include("tasks.urls")),
-    path(f"{API_V1_PREFIX}/subtasks/", include("subtasks.urls")),
+    path(f"{API_V1_PREFIX}/accounts", include("accounts.urls")),
+    path(f"{API_V1_PREFIX}/tasks", include("tasks.urls")),
+    path(f"{API_V1_PREFIX}", include("subtasks.urls")),
 ]
 
 
