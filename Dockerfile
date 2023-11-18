@@ -16,15 +16,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y curl && \
     apt-get install -y default-libmysqlclient-dev build-essential && \
     poetry config virtualenvs.create false
 
-# RUN apt-get install -y default-libmysqlclient-dev build-essential 
 
 # install python packages
 COPY pyproject.toml poetry.lock $APP_HOME/
-RUN poetry install --without=develop --no-root
+RUN poetry install --no-root
 
 # install app
 COPY ./backend $APP_HOME
 RUN poetry install --only-root
-
-# run app
-CMD python manage.py runserver --settings=config.settings.production

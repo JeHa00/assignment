@@ -30,16 +30,16 @@ services:
 
   app:
     container_name: assignment
-    build: 
+    build:
       context: .
-      dockerfile: Dockerfile.dev 
+      dockerfile: Dockerfile
     ports:
       - 8000:8000
     depends_on:
       db.mysql:
         condition: service_healthy
-    command: 
-      sh -c "python manage.py makemigrations && 
+    command:
+      sh -c "python manage.py makemigrations &&
               python manage.py migrate &&
               python manage.py runserver 0.0.0.0:8000 --settings=config.settings.develop"
 
