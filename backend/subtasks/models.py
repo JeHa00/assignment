@@ -13,6 +13,7 @@ class SubTask(BaseModel):
         Task,
         on_delete=models.CASCADE,
         verbose_name="상위 업무",
+        related_name="subtasks",
     )
 
     def __str__(self) -> str:
