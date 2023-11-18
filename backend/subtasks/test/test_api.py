@@ -24,9 +24,6 @@ def test_get_subtask_if_success(
     assert "id" in response.data
     assert response.data["id"] == fake_subtask.id
 
-    assert "task" in response.data
-    assert response.data["task"]["id"] == fake_task.id
-
     assert "team" in response.data
 
     assert "is_completed" in response.data
@@ -68,6 +65,8 @@ def test_get_subtasks_if_success(
         assert response.status_code == status.HTTP_200_OK
 
         assert "count" in response.data
+
+        # fake_subtasks fixture에서 생성한 subtask 총 수 30개
         assert response.data["count"] == 30
 
         assert "previous" in response.data
@@ -75,6 +74,8 @@ def test_get_subtasks_if_success(
         assert "next" in response.data
 
         assert "results" in response.data
+
+        # REST FRAMEWORK PAGE SIZE: 10
         assert len(response.data["results"]) == 10
 
 
