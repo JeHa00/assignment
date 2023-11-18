@@ -1,4 +1,4 @@
-from rest_framework import permissions, status, exceptions
+from rest_framework import permissions, exceptions
 
 
 class IsAuthorized(permissions.BasePermission):

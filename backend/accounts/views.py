@@ -83,7 +83,7 @@ class LoginView(APIView):
         user_data = {
             UserInformation.user_id: user.id,
             UserInformation.username: LoginSerializer(user).data.get(
-                UserInformation.username
+                UserInformation.username,
             ),
         }
 

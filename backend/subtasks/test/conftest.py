@@ -1,12 +1,13 @@
 import pytest
 
-from common.utils import random_lower_string
+# flake8: noqa
 from accounts.test.conftest import (
     fake_user,
     fake_another_user,
     fake_authorization_header,
 )
 
+# flake8: noqa
 from tasks.test.conftest import (
     fake_task,
     fake_another_task,

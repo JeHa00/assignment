@@ -5,7 +5,7 @@ from django.urls import reverse
 import pytest
 
 from common.utils import random_lower_string
-from accounts.enums import UserInformation, TokenInformation
+from accounts.enums import TokenInformation
 from accounts.serializers import SignupSerializer
 from accounts.models import User
 from common.models import Base
