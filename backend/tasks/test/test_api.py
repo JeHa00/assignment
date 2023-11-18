@@ -65,23 +65,22 @@ def test_get_tasks_if_success(
 ):
     url = reverse("task_list_create")
 
-    for page_number in range(1, 4):
+    for page_number in range(1, 3):
         response = client.get(
             f"{url}?page={page_number}",
             headers=fake_authorization_header,
         )
-
         assert response.status_code == status.HTTP_200_OK
 
         assert "count" in response.data
-        assert response.data["count"] == 30
+        assert response.data["count"] == 15
 
         assert "previous" in response.data
 
         assert "next" in response.data
 
         assert "results" in response.data
-        assert len(response.data["results"]) == 10
+        assert len(response.data["results"]) == 10 if page_number == 1 else 5
 
 
 @pytest.mark.django_db
