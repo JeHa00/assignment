@@ -5,7 +5,11 @@ from tasks.models import Task
 
 
 class SubTask(BaseModel):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        verbose_name="상위 업무",
+    )
 
     def __str__(self) -> str:
         return f"SubTask(team={self.team}, is_completed={self.is_completed})"

@@ -39,6 +39,7 @@ class User(AbstractBaseUser, Base):
         error_messages={
             "unique": _("A user with that username already exists."),
         },
+        verbose_name="유저 이름",
     )
 
     USERNAME_FIELD = "username"

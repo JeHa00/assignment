@@ -16,6 +16,7 @@ class Base(models.Model):
         choices=TeamChoices.choices,
         null=False,
         blank=False,
+        verbose_name="팀 소속",
     )
     created_at = models.DateTimeField(verbose_name="생성일", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="생성일", auto_now=True)
