@@ -60,7 +60,7 @@ def test_get_subtasks_if_success(
     fake_authorization_header: dict,
     fake_subtasks: None,
 ):
-    url = reverse("subtask_list_create")
+    url = reverse("subtask_list")
 
     for page_number in range(1, 4):
         response = client.get(
@@ -79,6 +79,48 @@ def test_get_subtasks_if_success(
 
         assert "results" in response.data
         assert len(response.data["results"]) == 10
+
+
+@pytest.mark.django_db
+@pytest.mark.create_a_subtask
+def test_create_subtask_if_success(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_task: Task,
+):
+    data_to_be_created = {"team": Base.TeamChoices.DANBIE}
+
+    url = reverse("subtask_create", args=[fake_task.id])
+
+    response = client.post(
+        url,
+        data_to_be_created,
+        headers=fake_authorization_header,
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert SubTask.objects.filter(id=1).exists() is True
+
+
+@pytest.mark.django_db
+@pytest.mark.create_a_subtask
+def test_create_subtask_if_not_found_task(
+    client: APIClient(),
+    fake_authorization_header: dict,
+):
+    data_to_be_created = {"team": Base.TeamChoices.DANBIE}
+
+    not_existed_task_id = 1
+
+    url = reverse("subtask_create", args=[not_existed_task_id])
+
+    response = client.post(
+        url,
+        data_to_be_created,
+        headers=fake_authorization_header,
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.django_db
