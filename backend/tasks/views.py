@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -10,6 +8,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     ListCreateAPIView,
 )
+from django.utils import timezone
 
 from common.http_exceptions import CommonHttpException
 from common.enums import MarkAsCompletion
@@ -131,7 +130,7 @@ class MarkAsCompletionView(APIView):
 
         initial_data = {
             MarkAsCompletion.is_completed: True,
-            MarkAsCompletion.completed_at: datetime.now(),
+            MarkAsCompletion.completed_at: timezone.localtime(timezone.now()),
         }
 
         serializer = self.serializer_class(

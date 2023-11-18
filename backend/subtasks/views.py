@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -11,6 +9,7 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
 )
+from django.utils import timezone
 
 from common.http_exceptions import CommonHttpException, CompletedSubtaskError
 from common.enums import MarkAsCompletion
@@ -68,7 +67,11 @@ class SubtaskView(RetrieveUpdateDestroyAPIView):
     serializer_class = SubtaskSerializer
     permission_classes = [IsAuthenticated, IsAuthorized]
 
-    def check_and_handle_not_found_error(self, request: Request, pk: int,):
+    def check_and_handle_not_found_error(
+        self,
+        request: Request,
+        pk: int,
+    ):
         selected_subtask = SubTask.objects.filter(pk=pk).last()
 
         if not selected_subtask:
@@ -143,7 +146,7 @@ class MarkAsCompletionView(APIView):
 
         initial_data = {
             MarkAsCompletion.is_completed: True,
-            MarkAsCompletion.completed_at: datetime.now(),
+            MarkAsCompletion.completed_at: timezone.localtime(timezone.now()),
         }
 
         serializer = self.serializer_class(
