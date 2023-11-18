@@ -73,6 +73,8 @@ def test_get_tasks_if_success(
         assert response.status_code == status.HTTP_200_OK
 
         assert "count" in response.data
+
+        # fake_tasks에서 30개가 생성되지만 직원의 팀과 동일한 업무 소속은 15개.
         assert response.data["count"] == 15
 
         assert "previous" in response.data
@@ -80,6 +82,8 @@ def test_get_tasks_if_success(
         assert "next" in response.data
 
         assert "results" in response.data
+
+        # REST FRAMEWORK의 PAGE 사이즈가 10
         assert len(response.data["results"]) == 10 if page_number == 1 else 5
 
 
