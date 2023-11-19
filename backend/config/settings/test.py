@@ -1,5 +1,7 @@
 from config.settings.base import *
 
+DEBUG = True
+
 INSTALLED_APPS += [
     "debug_toolbar",
 ]
@@ -13,22 +15,7 @@ MIDDLEWARE = [
 
 DATABASES = {
     "default": {
-        "ENGINE": env.str("DB_ENGINE"),
-        # "HOST": env.str("TEST_DB_HOST"),
-        "HOST": "localhost",
-        "USER": env.str("TEST_DB_USER"),
-        "PASSWORD": env.str("TEST_DB_PASSWORD"),
-        "NAME": env.str("TEST_DB_NAME"),
-        "PORT": env.int("TEST_DB_PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     },
 }
-
-"""
-{'default': {'ENGINE': 'django.db.backends.mysql', 
-'HOST': 'localhost', 
-'USER': 'project', 
-'PASSWORD': 'a1s2d3f4', 
-'NAME': 'test', 
-'PORT': 3310}
-}
-"""

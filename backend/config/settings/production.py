@@ -5,7 +5,7 @@ from config.settings.base import *
 
 DATABASES = {
     "default": {
-        "ENGINE": env.str("DB_ENGINE"),
+        "ENGINE": "django.db.backends.mysql",
         "HOST": env.str("DEV_DB_HOST"),
         "USER": env.str("DEV_DB_USER"),
         "PASSWORD": env.str("DEV_DB_PASSWORD"),

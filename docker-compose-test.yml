@@ -10,7 +10,6 @@ services:
       MYSQL_USER: ${TEST_DB_USER}
       MYSQL_PASSWORD: ${TEST_DB_PASSWORD}
       MYSQL_DATABASE: ${TEST_DB_NAME}
-      MYSQL_PORT: ${TEST_DB_PORT}
       TZ: Asia/Seoul
     volumes:
       - test_mysql_db:/var/lib/mysql

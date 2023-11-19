@@ -25,9 +25,6 @@ class WrongPasswordError(exceptions.APIException):
     default_code = "WRONG_PASSWORD_ERROR"
 
 
-# tasks
-
-
 # subtasks
 class CompletedSubtaskError(exceptions.APIException):
     status_code = status.HTTP_400_BAD_REQUEST
