@@ -4,7 +4,7 @@ from subtasks import views
 
 
 urlpatterns = [
-    path("/subtasks", views.SubTaskListView.as_view(), name="subtask_list"),
+    path("/subtasks/list", views.SubTaskListView.as_view(), name="subtask_list"),
     path(
         "/tasks/<int:task_id>/subtasks",
         views.SubtaskCreateView.as_view(),

@@ -8,7 +8,6 @@ from subtasks.test.conftest import fake_subtasks
 
 from common.utils import random_lower_string
 from common.models import Base
-from tasks.serializers import TaskSerializer
 from tasks.models import Task
 
 
@@ -67,7 +66,7 @@ def test_get_tasks_if_success(
     fake_tasks: None,
     fake_subtasks: None,
 ):
-    url = reverse("task_list_create")
+    url = reverse("task_list")
 
     for page_number in range(1, 6):
         response = client.get(
@@ -99,34 +98,35 @@ def test_create_task_if_success(
     fake_authorization_header: dict,
     fake_user: dict,
 ):
-    url = reverse("task_list_create")
-
     user = fake_user["user_object"]
+
+    url = reverse("task_create")
 
     title_max_length = 100
     content_max_length = 1000
 
     data_to_be_created = {
-        "create_user": user,
         "title": f"{random_lower_string(k=title_max_length)}",
         "content": f"{random_lower_string(k=content_max_length)}",
         "team": user.team,
     }
 
-    serializer = TaskSerializer(data_to_be_created)
-
     response = client.post(
         url,
-        serializer.data,
+        data_to_be_created,
         content_type="application/json",
         headers=fake_authorization_header,
     )
-
     assert response.status_code == status.HTTP_201_CREATED
 
     new_task = Task.objects.filter(id=1).last()
 
     assert new_task.create_user == user
+    assert new_task.is_completed is False
+    assert new_task.completed_at is None
+    assert new_task.team == user.team
+    assert new_task.title == data_to_be_created["title"]
+    assert new_task.content == data_to_be_created["content"]
 
 
 @pytest.mark.django_db
@@ -136,7 +136,7 @@ def test_create_task_if_bad_request(
     fake_authorization_header: dict,
     fake_user: dict,
 ):
-    url = reverse("task_list_create")
+    url = reverse("task_create")
 
     title_max_length = 100
     content_max_length = 1000
@@ -144,6 +144,7 @@ def test_create_task_if_bad_request(
     data_to_be_created = {
         "title": f"{random_lower_string(k=title_max_length)}",
         "content": f"{random_lower_string(k=content_max_length)}",
+        "completed_at": False,
     }
 
     # 보낸 데이터에 team 정보가 없어서 발생
