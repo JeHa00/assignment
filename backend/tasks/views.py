@@ -32,9 +32,11 @@ class TaskListView(ListAPIView):
     )
     def get(self, request, *args, **kwargs) -> TaskSerializer:
         """로그인한 유저의 team에 해당되는 업무와 하위 업무들을 조회한다.
+        하위 업무 정보에는 id, 완료 유무, 완료 날짜, 팀 정보가 포함된다.
 
         Returns:
-            TaskSerializer: 해당 task를 생성한 유저 정보, team에 속한 하위 업무, 업무를 전달
+
+            - Response (200 OK): 해당 task를 생성한 유저 정보, team에 속한 하위 업무, 업무를 전달
         """
         self.user_team = request.user.team
         return super().get(request, *args, **kwargs)
@@ -64,9 +66,11 @@ class TaskCreateView(CreateAPIView):
         """주어진 정보를 바탕으로 업무를 추가한다.
 
         Args:
-            - user_id (int): api path parameter로 전달
+
             - title (str): 업무 제목
+
             - content (str): 업무 내용
+
             - team (str): 소속 팀
                 - DANBIE: "단비"
                 - DARAE: "다래"
@@ -77,7 +81,8 @@ class TaskCreateView(CreateAPIView):
                 - SUPI: "수피"
 
         Returns:
-            Response (201 CREATED): 새로 생성된 Task 정보를 직렬화하여 전달
+
+            - Response (201 CREATED): 새로 생성된 Task 정보를 직렬화하여 전달
         """
         return super().post(request, *args, **kwargs)
 
@@ -98,15 +103,19 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 하위 업무(Task)가 존재하면 조회된 업무를 반환하고 없으면 에러를 발생시킨다.
 
         Args:
-            request (Request): Request 정보
-            pk (int): Task의 pk
+
+            - request (Request): Request 정보
+
+            - pk (int): Task의 pk
 
         Raises:
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 task를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
 
         Returns:
-            Task: 조회된 Task 정보 반환
+
+            - Task: 조회된 Task 정보 반환
         """
         selected_task = Task.objects.filter(pk=pk).last()
 
@@ -131,14 +140,17 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 특정 업무(Task)를 조회한다.
 
         Args:
-            pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
 
         Raises:
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 task를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (200 OK): pk에 해당하는 task를 직렬화하여 반환
+
+            - Response (200 OK): pk에 해당하는 task를 직렬화하여 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().get(request, *args, **kwargs)
@@ -159,16 +171,20 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 업무를 삭제한다.
 
         Args:
-            pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Task의 pk
 
         Raises:
+
             - HTTPException (403 FORBIDDEN): 삭제 권한이 없는 경우
                 - code: permission_denied
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 업무(Task)를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (204 NO CONTENT): 성공 메세지 반환
+
+            - Response (204 NO CONTENT): 성공 메세지 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().delete(request, pk, *args, **kwargs)
@@ -189,17 +205,22 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 업무를 수정한다.
 
         Args:
-            pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Task의 pk
 
         Raises:
+
             - HTTPException (400 BAD REQUEST): 변경하려는 내용이 필수 필드지만 값이 없을 경우
+
             - HTTPException (403 FORBIDDEN): 수정 권한이 없는 경우
                 - code: permission_denied
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 task를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (200 OK): 수정된 업무를 직렬화하여 반환
+
+            - Response (200 OK): 수정된 업무를 직렬화하여 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().put(request, *args, **kwargs)
@@ -220,17 +241,22 @@ class TaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 업무를 수정한다.
 
         Args:
-            pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
 
         Raises:
+
             - HTTPException (400 BAD REQUEST): 변경하려는 내용이 필수 필드지만 값이 없을 경우
+
             - HTTPException (403 FORBIDDEN): 수정 권한이 없는 경우
                 - code: permission_denied
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 task를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (200 OK): 수정된 업무를 직렬화하여 반환
+
+            - Response (200 OK): 수정된 업무를 직렬화하여 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().patch(request, *args, **kwargs)
@@ -248,18 +274,23 @@ class MarkAsCompletionView(APIView):
     )
     def patch(self, request: Request, pk: int) -> Response:
         """pk 정보에 해당되는 Task의 완료 유무 상태(is_completed)를 완료 상태로 변경한다.
+        직접 완료처리를 하는 것 외에도 하위 업무 모두가 완료처리 되면 업무도 완료처리 된다.
 
         Args:
-            pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Task의 pk로 패스 파라미터에 담아 전달한다.
 
         Raises:
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 task를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
+
             - HTTPException (403 FORBIDDEN): 수정 권한이 없는 경우
                 - code: permission_denied
 
         Returns:
-            Response (200 OK): 성공 메세지 반환
+
+            - Response (200 OK): 성공 메세지 반환
         """
         selected_task = Task.objects.filter(id=pk).last()
 

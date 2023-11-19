@@ -16,7 +16,7 @@ MIDDLEWARE = [
 
 DATABASES = {
     "default": {
-        "ENGINE": 'django.db.backends.mysql',
+        "ENGINE": "django.db.backends.mysql",
         "HOST": env.str("DEV_DB_HOST", "localhost"),
         "USER": env.str("DEV_DB_USER"),
         "PASSWORD": env.str("DEV_DB_PASSWORD"),

@@ -31,7 +31,10 @@ class SignupView(CreateAPIView):
         request: Request,
     ) -> Response:
         """username, password, team 소속 정보를 입력하여 회원가입을 한다.
+
+
         Args:
+
             - username (str): 로그인 시 입력할 이름
             - password (str): 로그인 시 입력할 비밀번호
             - team (str): 소속 팀
@@ -44,6 +47,7 @@ class SignupView(CreateAPIView):
                 - SUPI: "수피"
 
         Returns:
+
             - Response: 성공 시 201 CREATED를 보내고 실패하면 400 BAD_REQUEST 를 보낸다.
         """
         serializer = self.serializer_class(data=request.data)
@@ -71,16 +75,20 @@ class LoginView(APIView):
             - 성공 메세지
 
         Args:
+
             - username (str): 로그인 시 입력할 이름
             - password (str): 로그인 시 입력할 비밀번호
 
         Raises:
+
             - HTTPException (404 NOT FOUND): username에 해당하는 user를 찾지 못한 경우
                 - code: USER_NOT_FOUND
+
             - HTTPException (400 BAD REQUEST): username에 해당하는 비밀번호가 아닌 경우
                 - code: WRONG_PASSWORD_ERROR
 
         Returns:
+
             - Response (200 OK): 다음 정보를 반환
                 - user_data: id, username
                 - token information: access, refresh token
@@ -144,6 +152,7 @@ class LogoutView(APIView):
         """로그아웃 하여 인증 정보인 토큰을 삭제합니다.
 
         Returns:
+
             Response (202 ACCEPTED): 로그아웃 처리가 성공하면 202 accepted를 반환
         """
         response = Response(

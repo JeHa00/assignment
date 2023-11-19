@@ -28,7 +28,7 @@ class SubTaskListView(ListAPIView):
     @extend_schema(
         tags=["Subtask"],
         request=SubtaskSerializer,
-        responses=List[SubtaskSerializer],
+        responses=SubtaskSerializer,
         summary="하위 업무 목록 조회 - 로그인한 유저의 team에 해당되는 하위 업무들을 조회",
     )
     def get(
@@ -42,7 +42,8 @@ class SubTaskListView(ListAPIView):
         - id, team, is_completed, completed_at
 
         Returns:
-            Response (200 OK): 직렬화된 Subtask 정보가 list에 담겨져 반환
+
+            - Response (200 OK): 직렬화된 Subtask 정보가 list에 담겨져 반환
         """
         return super().get(
             request,
@@ -81,7 +82,9 @@ class SubtaskCreateView(CreateAPIView):
         """주어진 task, team 정보를 바탕으로 하위 업무를 추가한다.
 
         Args:
+
             - task_id (int): api path parameter로 전달
+
             - team (str): 소속 팀
                 - DANBIE: "단비"
                 - DARAE: "다래"
@@ -92,11 +95,13 @@ class SubtaskCreateView(CreateAPIView):
                 - SUPI: "수피"
 
         Raises:
+
             - HTTPException (404 NOT FOUND): task_id에 해당되는 task를 못 찾을 경우
                 - code: TASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (201 CREATED): 새로 생성된 Subtask 정보를 직렬화하여 전달
+
+            - Response (201 CREATED): 새로 생성된 Subtask 정보를 직렬화하여 전달
         """
         selected_task = Task.objects.filter(id=kwargs.get("task_id")).last()
         if not selected_task:
@@ -124,15 +129,18 @@ class SubtaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 Subtask가 존재하면 조회된 Subtask를 반환하고 없으면 에러를 발생시킨다.
 
         Args:
-            request (Request): Request 정보
-            pk (int): Subtask의 pk
+
+            - request (Request): Request 정보
+            - pk (int): Subtask의 pk
 
         Raises:
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 subtask를 못 찾을 경우
                 - code: SUBTASK_NOT_FOUND_ERROR
 
         Returns:
-            SubTask: 조회된 Subtask 정보 반환
+
+            - SubTask: 조회된 Subtask 정보 반환
         """
         selected_subtask = SubTask.objects.filter(pk=pk).last()
 
@@ -157,14 +165,17 @@ class SubtaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 특정 하위 업무 Subtask를 조회한다.
 
         Args:
-            pk (int): Subtask의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Subtask의 pk
 
         Raises:
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 subtask를 못 찾을 경우
                 - code: SUBTASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (200 OK): pk에 해당하는 Subtask를 직렬화하여 반환
+
+            - Response (200 OK): pk에 해당하는 Subtask를 직렬화하여 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().get(request, *args, **kwargs)
@@ -185,18 +196,22 @@ class SubtaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 하위 업무를 삭제한다. 단 하위 업무가 완료 상태면 삭제할 수 없다.
 
         Args:
-            pk (int): Subtask의 pk로 패스 파라미터에 담아 전달한다.
+            - pk (int): Subtask의 pk
 
         Raises:
+
             - HTTPException (400 BAD REQUEST): 조회된 하위 업무가 완료된 경우
                 - code: COMPLETED_SUBTASK_ERROR
+
             - HTTPException (403 FORBIDDEN): 삭제 권한이 없는 경우
                 - code: permission_denied
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 subtask를 못 찾을 경우
                 - code: SUBTASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (204 NO CONTENT): 성공 메세지 반환
+
+            - Response (204 NO CONTENT): 성공 메세지 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().delete(request, pk, *args, **kwargs)
@@ -222,17 +237,21 @@ class SubtaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 하위 업무를 수정한다.
 
         Args:
-            pk (int): Subtask의 pk로 패스 파라미터에 담아 전달한다.
+
+            pk (int): Subtask의 pk
 
         Raises:
+
             - HTTPException (400 BAD REQUEST): 변경하려는 내용이 필수 필드지만 값이 없을 경우
+
             - HTTPException (403 FORBIDDEN): 수정 권한이 없는 경우
                 - code: permission_denied
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 subtask를 못 찾을 경우
                 - code: SUBTASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (200 OK): 수정된 하위업무를 직렬화하여 반환
+            - Response (200 OK): 수정된 하위업무를 직렬화하여 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().put(request, *args, **kwargs)
@@ -247,17 +266,22 @@ class SubtaskView(RetrieveUpdateDestroyAPIView):
         """pk에 해당하는 하위 업무를 수정한다.
 
         Args:
+
             pk (int): Subtask의 pk로 패스 파라미터에 담아 전달한다.
 
         Raises:
+
             - HTTPException (400 BAD REQUEST): 변경하려는 내용이 필수 필드지만 값이 없을 경우
+
             - HTTPException (403 FORBIDDEN): 수정 권한이 없는 경우
                 - code: permission_denied
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 subtask를 못 찾을 경우
                 - code: SUBTASK_NOT_FOUND_ERROR
 
         Returns:
-            Response (200 OK): 수정된 하위업무를 직렬화하여 반환
+
+            - Response (200 OK): 수정된 하위업무를 직렬화하여 반환
         """
         self.check_and_handle_not_found_error(request, pk)
         return super().patch(request, *args, **kwargs)
@@ -271,22 +295,27 @@ class MarkAsCompletionView(APIView):
         tags=["Subtask"],
         request=SubtaskSerializer,
         responses=SubtaskSerializer,
-        summary="완료표시 - 주어진 정보에 해당하는 하위 업무를 완료 상태로 변경",
+        summary="완료표시 - 같은 팀에 한해서 주어진 정보에 해당하는 하위 업무를 완료 상태로 변경",
     )
     def patch(self, request: Request, pk: int) -> Response:
         """pk 정보에 해당되는 하위 업무(Subtask)의 완료 유무 상태(is_completed)를 완료 상태로 변경한다.
+        단 유저의 팀과 하위 업무의 팀이 동일한 팀이어야 한다.
 
         Args:
-            pk (int): Subtask의 pk로 패스 파라미터에 담아 전달한다.
+
+            - pk (int): Subtask의 pk로 패스 파라미터에 담아 전달한다.
 
         Raises:
+
             - HTTPException (404 NOT FOUND): pk에 해당되는 subtask를 못 찾을 경우
                 - code: SUBTASK_NOT_FOUND_ERROR
+
             - HTTPException (403 FORBIDDEN): 수정 권한이 없는 경우
                 - code: permission_denied
 
         Returns:
-            Response (200 OK): 성공 메세지 반환
+
+            - Response (200 OK): 성공 메세지 반환
         """
         selected_subtask = SubTask.objects.filter(id=pk).last()
 
