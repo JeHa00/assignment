@@ -32,9 +32,9 @@ class SignupView(CreateAPIView):
     ) -> Response:
         """username, password, team 소속 정보를 입력하여 회원가입을 한다.
         Args:
-            username (str): 로그인 시 입력할 이름
-            password (str): 로그인 시 입력할 비밀번호
-            team (User.TeamChoices): 소속 팀
+            - username (str): 로그인 시 입력할 이름
+            - password (str): 로그인 시 입력할 비밀번호
+            - team (str): 소속 팀
                 - DANBIE: "단비"
                 - DARAE: "다래"
                 - BLABLA: "블라블라"
@@ -44,7 +44,7 @@ class SignupView(CreateAPIView):
                 - SUPI: "수피"
 
         Returns:
-            Response: 성공 시, 201을 보내고 실패하면 400 코드를 보낸다.
+            - Response: 성공 시 201 CREATED를 보내고 실패하면 400 BAD_REQUEST 를 보낸다.
         """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -59,12 +59,33 @@ class LoginView(APIView):
         tags=["Account"],
         request=LoginSerializer,
         responses=LoginSerializer,
-        summary="로그인 - username, password 정보 필요",
+        summary="로그인 - username, password로 로그인하여 user data, token 정보를 반환",
     )
     def post(
         self,
         request: Request,
     ) -> Response:
+        """username과 password로 로그인하여 다음 정보들을 받는다.
+            - id, username
+            - token 정보
+            - 성공 메세지
+
+        Args:
+            - username (str): 로그인 시 입력할 이름
+            - password (str): 로그인 시 입력할 비밀번호
+
+        Raises:
+            - HTTPException (404 NOT FOUND): username에 해당하는 user를 찾지 못한 경우
+                - code: USER_NOT_FOUND
+            - HTTPException (400 BAD REQUEST): username에 해당하는 비밀번호가 아닌 경우
+                - code: WRONG_PASSWORD_ERROR
+
+        Returns:
+            - Response (200 OK): 다음 정보를 반환
+                - user_data: id, username
+                - token information: access, refresh token
+                - message: LOGIN_SUCCESS
+        """
         username = request.data.get(UserInformation.username)
         password = request.data.get(UserInformation.password)
 
@@ -120,6 +141,11 @@ class LogoutView(APIView):
         summary="로그아웃 - 토큰 정보 삭제",
     )
     def delete(self, request: Request) -> Response:
+        """로그아웃 하여 인증 정보인 토큰을 삭제합니다.
+
+        Returns:
+            Response (202 ACCEPTED): 로그아웃 처리가 성공하면 202 accepted를 반환
+        """
         response = Response(
             {"message": "LOGOUT_SUCCESS"},
             status=status.HTTP_202_ACCEPTED,

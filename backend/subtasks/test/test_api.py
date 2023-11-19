@@ -1,5 +1,6 @@
 from rest_framework.test import APIClient
 from rest_framework import status
+from django.utils import timezone
 from django.urls import reverse
 import pytest
 
@@ -25,6 +26,7 @@ def test_get_subtask_if_success(
     assert response.data["id"] == fake_subtask.id
 
     assert "team" in response.data
+    assert response.data["team"] == Base.TeamChoices.DANBIE
 
     assert "is_completed" in response.data
     assert response.data["is_completed"] is False
@@ -95,9 +97,21 @@ def test_create_subtask_if_success(
         data_to_be_created,
         headers=fake_authorization_header,
     )
-
     assert response.status_code == status.HTTP_201_CREATED
+
     assert SubTask.objects.filter(id=1).exists() is True
+
+    assert "id" in response.data
+    assert response.data["id"] == fake_task.id
+
+    assert "team" in response.data
+    assert response.data["team"] == Base.TeamChoices.DANBIE
+
+    assert "is_completed" in response.data
+    assert response.data["is_completed"] is False
+
+    assert "completed_at" in response.data
+    assert response.data["completed_at"] is None
 
 
 @pytest.mark.django_db
@@ -150,6 +164,27 @@ def test_update_subtask_if_success(
 
 @pytest.mark.django_db
 @pytest.mark.update_a_subtask
+def test_update_subtask_if_not_found(
+    client: APIClient(),
+    fake_authorization_header: dict,
+):
+    not_existed_subtask_id = 1
+
+    url = reverse("subtask", args=[not_existed_subtask_id])
+
+    data_to_be_updated = {"team": Base.TeamChoices.DANGI}
+
+    response = client.patch(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
 def test_update_subtask_if_bad_request(
     client: APIClient(),
     fake_authorization_header: dict,
@@ -166,6 +201,142 @@ def test_update_subtask_if_bad_request(
         content_type="application/json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["team"].pop() == "This field may not be null."
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_forbidden(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_another_subtask: SubTask,
+):
+    url = reverse("subtask", args=[fake_another_subtask.id])
+
+    data_to_be_updated = {"team": None}
+
+    response = client.patch(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
+    assert response.data["detail"].code == "permission_denied"
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_success_by_put_method(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_subtask: SubTask,
+):
+    url = reverse("subtask", args=[fake_subtask.id])
+
+    assert fake_subtask.team == Base.TeamChoices.DANBIE
+
+    data_to_be_updated = {
+        "team": Base.TeamChoices.BLABLA,
+        "is_completed": True,
+        "completed_at": timezone.localtime(timezone.now()),
+    }
+
+    response = client.put(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    refreshed_subtask = SubTask.objects.filter(id=fake_subtask.id).last()
+
+    assert refreshed_subtask.team == Base.TeamChoices.BLABLA
+    assert refreshed_subtask.is_completed is True
+    assert refreshed_subtask.completed_at is not None
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_not_found_by_put_method(
+    client: APIClient(),
+    fake_authorization_header: dict,
+):
+    not_existed_subtask_id = 1
+
+    url = reverse("subtask", args=[not_existed_subtask_id])
+
+    data_to_be_updated = {
+        "team": Base.TeamChoices.BLABLA,
+        "is_completed": True,
+        "completed_at": timezone.localtime(timezone.now()),
+    }
+
+    response = client.put(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_bad_request_by_put_method(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_subtask: SubTask,
+):
+    url = reverse("subtask", args=[fake_subtask.id])
+
+    data_to_be_updated = {
+        "team": None,
+        "is_completed": True,
+        "completed_at": timezone.localtime(timezone.now()),
+    }
+
+    response = client.put(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["team"].pop() == "This field may not be null."
+
+
+@pytest.mark.django_db
+@pytest.mark.update_a_subtask
+def test_update_subtask_if_forbidden_by_put_method(
+    client: APIClient(),
+    fake_authorization_header: dict,
+    fake_another_subtask: SubTask,
+):
+    url = reverse("subtask", args=[fake_another_subtask.id])
+
+    data_to_be_updated = {
+        "team": Base.TeamChoices.BLABLA,
+        "is_completed": True,
+        "completed_at": timezone.localtime(timezone.now()),
+    }
+
+    response = client.put(
+        url,
+        data_to_be_updated,
+        headers=fake_authorization_header,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
+    assert response.data["detail"].code == "permission_denied"
 
 
 @pytest.mark.django_db
