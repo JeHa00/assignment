@@ -40,7 +40,18 @@
 # 테스트
 
 - pytest-django를 사용했습니다.
+
+< 수정 전 >
 - 테스트 실행 방법: manage.py 가 있는 경로에서 아래 명령어를 입력합니다.
+    - 간략하게 테스트 통과 유무를 확인하고 싶으시면 `pytest`를 입력합니다.
+    - 자세한 테스트 명과 결과를 보고 싶으시면 `pytest -sv` 를 입력합니다.
+- `pytest -svm {marker name}` 을 사용하면 marker name이 있는 테스트 별로 구분해서 실행할 수 있습니다.
+    - marker name은 `pytest.ini`에서 확인할 수 있습니다.
+
+< 수정 후 (2023-11-21)>
+
+- 테스트 실행 방법: `docker-compose -f docker-compose-test.yml`를 실행하여 테스트 전용 컨테이너를 실행합니다.  
+    - manage.py 가 있는 경로에서 아래 명령어를 입력합니다.  
     - 간략하게 테스트 통과 유무를 확인하고 싶으시면 `pytest`를 입력합니다.
     - 자세한 테스트 명과 결과를 보고 싶으시면 `pytest -sv` 를 입력합니다.
 - `pytest -svm {marker name}` 을 사용하면 marker name이 있는 테스트 별로 구분해서 실행할 수 있습니다.
