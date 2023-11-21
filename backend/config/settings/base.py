@@ -88,6 +88,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Database
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
